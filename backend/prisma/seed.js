@@ -6,13 +6,18 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding HAQMS database...');
 
+  // Clean existing data before seeding
+  await prisma.queueToken.deleteMany();
+  await prisma.appointment.deleteMany();
+  await prisma.patient.deleteMany();
+  await prisma.doctor.deleteMany();
+  await prisma.user.deleteMany();
+
   // ─── Users ────────────────────────────────────────────────────────────────
   const hashedPassword = await bcrypt.hash('password123', 10);
 
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@haqms.com' },
-    update: {},
-    create: {
+  const admin = await prisma.user.create({
+    data: {
       email: 'admin@haqms.com',
       password: hashedPassword,
       name: 'System Administrator',
@@ -20,10 +25,8 @@ async function main() {
     },
   });
 
-  const receptionist = await prisma.user.upsert({
-    where: { email: 'reception1@haqms.com' },
-    update: {},
-    create: {
+  const receptionist = await prisma.user.create({
+    data: {
       email: 'reception1@haqms.com',
       password: hashedPassword,
       name: 'Sarah Connor',
@@ -31,10 +34,8 @@ async function main() {
     },
   });
 
-  const doctorUser1 = await prisma.user.upsert({
-    where: { email: 'doctor1@haqms.com' },
-    update: {},
-    create: {
+  const doctorUser1 = await prisma.user.create({
+    data: {
       email: 'doctor1@haqms.com',
       password: hashedPassword,
       name: 'Dr. Gregory House',
@@ -42,10 +43,8 @@ async function main() {
     },
   });
 
-  const doctorUser2 = await prisma.user.upsert({
-    where: { email: 'doctor2@haqms.com' },
-    update: {},
-    create: {
+  const doctorUser2 = await prisma.user.create({
+    data: {
       email: 'doctor2@haqms.com',
       password: hashedPassword,
       name: 'Dr. Meredith Grey',
@@ -53,10 +52,8 @@ async function main() {
     },
   });
 
-  const doctorUser3 = await prisma.user.upsert({
-    where: { email: 'doctor3@haqms.com' },
-    update: {},
-    create: {
+  const doctorUser3 = await prisma.user.create({
+    data: {
       email: 'doctor3@haqms.com',
       password: hashedPassword,
       name: 'Dr. John Carter',
@@ -67,10 +64,8 @@ async function main() {
   console.log('✅ Users seeded');
 
   // ─── Doctors ──────────────────────────────────────────────────────────────
-  const doctor1 = await prisma.doctor.upsert({
-    where: { userId: doctorUser1.id },
-    update: {},
-    create: {
+  const doctor1 = await prisma.doctor.create({
+    data: {
       userId: doctorUser1.id,
       name: 'Dr. Gregory House',
       specialization: 'Diagnostics',
@@ -82,10 +77,8 @@ async function main() {
     },
   });
 
-  const doctor2 = await prisma.doctor.upsert({
-    where: { userId: doctorUser2.id },
-    update: {},
-    create: {
+  const doctor2 = await prisma.doctor.create({
+    data: {
       userId: doctorUser2.id,
       name: 'Dr. Meredith Grey',
       specialization: 'General Surgery',
@@ -97,10 +90,8 @@ async function main() {
     },
   });
 
-  const doctor3 = await prisma.doctor.upsert({
-    where: { userId: doctorUser3.id },
-    update: {},
-    create: {
+  const doctor3 = await prisma.doctor.create({
+    data: {
       userId: doctorUser3.id,
       name: 'Dr. John Carter',
       specialization: 'Emergency Medicine',
@@ -112,7 +103,6 @@ async function main() {
     },
   });
 
-  // Extra doctors not linked to a login account
   const doctor4 = await prisma.doctor.create({
     data: {
       name: 'Dr. Lisa Cuddy',
@@ -141,7 +131,6 @@ async function main() {
 
   // ─── Patients ─────────────────────────────────────────────────────────────
   const patients = await Promise.all([
-    // Patients WITH medical history
     prisma.patient.create({
       data: {
         name: 'Alice Johnson',
@@ -200,7 +189,6 @@ async function main() {
         medicalHistory: 'Anxiety disorder (on Sertraline). Eczema flare-ups. No surgical history.',
       },
     }),
-    // Patients WITHOUT medical history — triggers frontend crash bug
     prisma.patient.create({
       data: {
         name: 'Bruce Wayne',
@@ -258,7 +246,6 @@ async function main() {
   };
 
   const appointments = await Promise.all([
-    // Today's appointments
     prisma.appointment.create({
       data: {
         patientId: patients[0].id,
@@ -295,7 +282,6 @@ async function main() {
         status: 'COMPLETED',
       },
     }),
-    // Bruce Wayne — no medical history (crash trigger)
     prisma.appointment.create({
       data: {
         patientId: patients[6].id,
@@ -305,7 +291,6 @@ async function main() {
         status: 'PENDING',
       },
     }),
-    // Clark Kent — no medical history (crash trigger)
     prisma.appointment.create({
       data: {
         patientId: patients[7].id,
@@ -315,7 +300,6 @@ async function main() {
         status: 'PENDING',
       },
     }),
-    // Yesterday (completed)
     prisma.appointment.create({
       data: {
         patientId: patients[4].id,
@@ -334,7 +318,6 @@ async function main() {
         status: 'COMPLETED',
       },
     }),
-    // Tomorrow
     prisma.appointment.create({
       data: {
         patientId: patients[9].id,
@@ -353,7 +336,6 @@ async function main() {
         status: 'PENDING',
       },
     }),
-    // Cancelled
     prisma.appointment.create({
       data: {
         patientId: patients[0].id,
@@ -428,11 +410,11 @@ async function main() {
   console.log('🎉 Database seeded successfully!');
   console.log('');
   console.log('Pre-seeded accounts (password: password123):');
-  console.log('  ADMIN       → admin@haqms.com');
+  console.log('  ADMIN        → admin@haqms.com');
   console.log('  RECEPTIONIST → reception1@haqms.com');
-  console.log('  DOCTOR      → doctor1@haqms.com  (Dr. Gregory House)');
-  console.log('  DOCTOR      → doctor2@haqms.com  (Dr. Meredith Grey)');
-  console.log('  DOCTOR      → doctor3@haqms.com  (Dr. John Carter)');
+  console.log('  DOCTOR       → doctor1@haqms.com  (Dr. Gregory House)');
+  console.log('  DOCTOR       → doctor2@haqms.com  (Dr. Meredith Grey)');
+  console.log('  DOCTOR       → doctor3@haqms.com  (Dr. John Carter)');
 }
 
 main()
