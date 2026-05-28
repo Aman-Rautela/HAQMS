@@ -7,6 +7,7 @@ import Navbar from '@/components/common/Navbar';
 import Link from 'next/link';
 import { ArrowLeft, ClipboardList, User, Phone, Calendar } from 'lucide-react';
 
+
 export default function PatientHistoryRecords() {
   const { id } = useParams();
   const { token, API_BASE_URL, user } = useAuth();

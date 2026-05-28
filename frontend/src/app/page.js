@@ -1,9 +1,12 @@
 'use client';
-
+import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { Activity, ShieldAlert, MonitorPlay, Users, CalendarDays, ArrowRight } from 'lucide-react';
 
 export default function Home() {
+	
+const { user } = useAuth();
+
   return (
     <div className="flex flex-col min-h-screen justify-between py-12 px-6 lg:px-8">
       <div className="max-w-4xl mx-auto w-full text-center mt-12 sm:mt-20">
@@ -43,7 +46,7 @@ export default function Home() {
           </Link>
 
           {/* Card 2: Public Queue Monitor */}
-          <Link href="/queue" className="group">
+	  { user && <Link href="/monitor" className="group">
             <div className="glass p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 text-left hover:border-teal-500/50 hover:shadow-teal-500/10 transition-all duration-300 transform hover:-translate-y-1">
               <div className="p-3 bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-xl w-fit group-hover:bg-teal-500 group-hover:text-white transition-colors duration-300">
                 <MonitorPlay className="h-6 w-6" />
@@ -56,7 +59,7 @@ export default function Home() {
                 Real-time active queue board tracking patient check-ins and calling tokens by physician. Built with live refresh.
               </p>
             </div>
-          </Link>
+          </Link>}
         </div>
       </div>
 

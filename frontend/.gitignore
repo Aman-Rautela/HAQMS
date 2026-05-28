@@ -4,6 +4,7 @@ node_modules/
 # Next.js
 .next/
 out/
+/gitignore
 
 # Environment variables
 .env
@@ -20,3 +21,4 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
